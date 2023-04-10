@@ -1,0 +1,187 @@
+<html>
+<head>
+	<title>Candy Item App</title>
+	<style>
+		form {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			margin-top: 50px;
+		}
+    body {
+      background-image: url("https://cdn.create.vista.com/api/media/small/69797179/stock-photo-lollipop-on-wood");
+      background-repeat: no-repeat;
+      background-size: cover;
+      
+    }
+    .container {
+      background-color:transparent;
+      align-items: center;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+	  width:800px ;
+	  margin: auto;
+    }
+
+		input {
+			margin: 10px;
+			padding: 10px;
+			width: 300px;
+			border-radius: 5px;
+			border: none;
+			box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+		}
+
+		button {
+			margin: 20px;
+			padding: 10px 20px;
+			background-color: #007bff;
+			color: #fff;
+			border: none;
+			border-radius: 5px;
+			box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+			cursor: pointer;
+		}
+
+		button:hover {
+			background-color: #0062cc;
+		}
+	</style>
+</head>
+<body>
+  <div class="container mt-5">
+    <u><h1 class="text-center mb-5" style="text-align: center; font-family: system-ui;">Expense Tracker App</h1></u>
+	<form>
+		<label for="CandyItem">Candy Item:</label>
+		<input type="CandyItem" id="CandyItem" name="CandyItem">
+
+		<label for="Description">Description:</label>
+		<input type="Description" id="Description" name="Description">
+
+		<label for="Price">Price:</label>
+		<input type="number" id="Price" name="Price">
+        <label for="Quantity">Quantity:</label>
+        <input type="number" id="Quantity" name="Quantity">
+        
+		<button type="submit">Add Item</button>
+	</form>
+    <div id="candyList">
+		<h2>Candy List:</h2>	
+	</div>
+	</div>
+
+	<!-- got this link from axios cdn -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.5/axios.min.js"></script>
+<script>
+    const form = document.querySelector('form');
+    const candyList = document.querySelector('#candyList');
+    let candyData = [];
+
+// Retrieve existing user data from the CRUD API
+axios.get("https://crudcrud.com/api/024123ecb61146ab83213cca225d0f7b/candy")
+.then((response) =>{
+    console.log(response)
+
+    // Save the retrieved data to a variable
+    candyData = response.data;
+
+    // Render the list of registered users
+    renderCandyList();
+})
+
+// Function to render the list of registered users
+function renderCandyList() {
+    candyList.innerHTML = '';
+
+    candyData.forEach((candy,index) => {
+        const li = document.createElement('li');
+        li.textContent = `CandyItem : ${candy.CandyItem} ,  Description : ${candy.Description} , Price : ${candy.Price} , Quantity : ${candy.Quantity}`;
+
+        // Create an edit button to edit the user details
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.addEventListener('click', () => {
+            // Populate the form fields with the user details
+            document.getElementById('CandyItem').value = candy.CandyItem;
+            document.getElementById('Description').value = candy.Description;
+            document.getElementById('Price').value = candy.Price;
+            document.getElementById('Quantity').value = candy.Quantity;
+
+            // Remove the user data from the array
+            candyData.splice(index, 1);
+            // Update the list of registered users
+            renderCandyList();
+            axios.put(`https://crudcrud.com/api/024123ecb61146ab83213cca225d0f7b/candy/${candy._id}`)
+            .then((response) =>{
+                console.log(response)
+            })
+            .catch((error)=>{
+                console.log(error)
+            })
+        });
+
+        // Create a button to delete the user
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', () => {
+            // Remove the user data from the array
+            candyData.splice(index, 1);
+            // Update the list of registered users
+            renderCandyList();
+            // Send a DELETE request to the CRUD API to delete the user
+            axios.delete(`https://crudcrud.com/api/024123ecb61146ab83213cca225d0f7b/candy/${candy._id}`)
+            .then((response) =>{
+                console.log(response)
+            })
+            .catch((error)=>{
+                console.log(error)
+            })
+        });
+
+        li.appendChild(editButton);
+        li.appendChild(deleteButton);
+        candyList.appendChild(li);
+    })
+}
+
+form.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const CandyItem = document.getElementById('CandyItem').value;
+    const Description = document.getElementById('Description').value;
+    const Price = document.getElementById('Price').value;
+    const Quantity = document.getElementById('Quantity').value;
+    
+    const candy = {
+        CandyItem,
+        Description,
+        Price,
+        Quantity        
+    };
+
+    // Add the new user data to the beginning of the array
+    candyData.unshift(candy);
+
+    // Send a POST request to the CRUD API to add the new user
+    axios.post("https://crudcrud.com/api/024123ecb61146ab83213cca225d0f7b/candy/", candy)
+    .then((response) =>{
+        console.log(response)
+    })
+    .catch((error)=>{
+        console.log(error)
+    })
+
+    // Clear the form fields
+    document.getElementById('CandyItem').value = '';
+    document.getElementById('Description').value = '';
+    document.getElementById('Price').value = '';
+    document.getElementById('Quantity').value = '';
+
+    // Render the updated list of registered users
+    renderCandyList();
+});
+
+ </script>
+	</body>
+	</html>
